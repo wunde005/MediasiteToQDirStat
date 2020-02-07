@@ -1,0 +1,6 @@
+*.log
+*.xml
+*.out
+*.qdirstat
+tmp
+.vsscode/
