@@ -26,7 +26,7 @@
     It is recommened to add mime setting for .head,.version and .archive 
     along with settings for the views extensions .0,.1,.10,.100....
     This will allow you to set the colors for the graph
-    A example QDirStat-mime.conf has been included and can by used inplace of the default one
+    A sample QDirStat-mime.conf has been included or it can by used inplace of the default one
 #>
 
 [CmdletBinding(DefaultParameterSetName='default')]
