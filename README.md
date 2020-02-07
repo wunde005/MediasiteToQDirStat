@@ -22,3 +22,15 @@ Notes:
 
 Example Storage report viewed in QDirStat:
 ![Example QDirStat](/images/Example.jpg)
+
+Alternate Reports:
+
+* revisionReport
+  - Outputs presentation as folder with files representing head,revision and archive using extensions
+* storagePerView
+  - Outputs file size as Size/View 
+* LastViewedReport 
+  - Outputs file size as seconds since last viewed 
+  
+Example Storage revision report viewed in QDirStat:
+![Example QDirStat Revision Report](/images/Example-revisionReport.jpg)
