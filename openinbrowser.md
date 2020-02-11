@@ -9,6 +9,6 @@ add line:
 
 `export mediasiteserver="<server url>"`
 
-it will append /Manage/#module=Sf.Manage.PresentationSummary&args[id]=$id
+The script will append `/Manage/#module=Sf.Manage.PresentationSummary&args[id]=$id`
 
 restart bash
