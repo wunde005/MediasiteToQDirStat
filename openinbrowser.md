@@ -7,7 +7,7 @@ edit ~/.bash_profile
 
 add line:
 
-export mediasiteserver="<server url>"
+`export mediasiteserver="<server url>"`
 
 it will append /Manage/#module=Sf.Manage.PresentationSummary&args[id]=$id
 
