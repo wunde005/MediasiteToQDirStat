@@ -5,7 +5,7 @@ args=("$@")
 
 id=`grep -F ",${args[0]}," $PWD/idmap.txt | cut -f 1 -d ,`
 
-if [ -z "$media2siteserver" ]
+if [ -z "$mediasiteserver" ]
 then
     echo "missing mediasite server info"
     chrome "https://github.com/wunde005/MediasiteToQDirStat/blob/master/openinbrowser.md"
