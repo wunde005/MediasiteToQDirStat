@@ -1,6 +1,9 @@
+*.id
+*.bak
 *.log
 *.xml
 *.out
 *.qdirstat
+idmap.txt
 tmp
 .vsscode/

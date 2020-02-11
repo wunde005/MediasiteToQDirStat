@@ -15,6 +15,10 @@
     Outputs file size as Size/View 
 .PARAMETER LastViewedReport 
     Outputs file size as seconds since last viewed 
+.PARAMETER views
+    Outputs file size as views
+.PARAMETER lastviewed
+    Switches to using last viewed date instead of modified date.  Defaults to last viewed in the lastviewreport option
 .EXAMPLE
     .\convert.ps1 -report "Mediasite Storage report.xml" -output "qdirstat.out"
     Reading Mediasite report: Mediasite Storage report.xml
@@ -35,18 +39,30 @@ param
     [Parameter(ParameterSetName='revisionreport',Mandatory=$True)]
     [Parameter(ParameterSetName='storageperview',Mandatory=$True)]
     [Parameter(ParameterSetName='lastviewedreport',Mandatory=$True)]
+    [Parameter(ParameterSetName='views',Mandatory=$True)]
+    [Parameter(ParameterSetName='Duration',Mandatory=$True)]
     [Parameter(ParameterSetName='default',Mandatory=$True)][string]$report,
     [Parameter(ParameterSetName='revisionreport',Mandatory=$True)]
     [Parameter(ParameterSetName='storageperview',Mandatory=$True)]
     [Parameter(ParameterSetName='lastviewedreport',Mandatory=$True)]
+    [Parameter(ParameterSetName='views',Mandatory=$True)]
+    [Parameter(ParameterSetName='Duration',Mandatory=$True)]
     [Parameter(ParameterSetName='default',Mandatory=$True)][string]$output,
     [Parameter(ParameterSetName='revisionreport',Mandatory=$True)][switch]$revisionReport,
     [Parameter(ParameterSetName='storageperview',Mandatory=$True)][switch]$storagePerView,
-    [Parameter(ParameterSetName='lastviewedreport',Mandatory=$True)][switch]$LastViewedReport
+    [Parameter(ParameterSetName='lastviewedreport',Mandatory=$True)][switch]$LastViewedReport,
+    [Parameter(ParameterSetName='lastviewedreport')][int]$daypower=10,
+    [Parameter(ParameterSetName='views',Mandatory=$True)][switch]$views,
+    [Parameter(ParameterSetName='Duration',Mandatory=$True)][switch]$Duration,
+    [switch]$lastviewed
 )
+#$todayepoc
+#$maxdays =0
+$script:idtxt = ""
+$lastviewedoption = ($lastviewed -or $LastViewedReport) 
 
 if($LastViewedReport){
-    $todayepoc = get-date -UFormat %s
+    $script:todayepoc = get-date -UFormat %s
 }
 function Remove-StringSpecialCharacter {
     <#
@@ -172,7 +188,9 @@ function PresentationLineRevisions{
     
     $pdir = $folder + "/" + $Titlenew
     $dirtxt = ""
-    $dirtxt += ("`nD $($pdir.Replace(' ','%20'))     4096    $datehex`n")
+    #$dirtxt += ("`nD $($pdir.Replace(' ','%20'))     4096    $datehex`n")
+    $dirtxt += ("`nD $($pdir.Replace(' ','%20'))     0    $datehex`n")
+    #$dirtxt += ("`nD $($pdir.Replace(' ','%20'))     1    $datehex`n")
     
     if([long]$presentation.TotalHeadRevisionStorage -gt 0){
         $dirtxt += "F`t$Titlenew.Head`t$($presentation.TotalHeadRevisionStorage)`t$datehex`n"
@@ -190,19 +208,14 @@ function PresentationLineRevisions{
 
 
 #Outputs presentation as a file with extension based on views
-function PresentationLine($presentation){
-    $LastModified = [datetime]$presentation.LastModified
-    $datehex='0x{0:X8}' -f [INT]([Math]::Floor([decimal](Get-Date($LastModified[0]).ToUniversalTime()-uformat "%s")))
-    
-    $t = $presentation.TotalViews
-    if($t -eq 0){
-        $t = .1
-    }
-    
-    if($storagePerView){
-        $Total = [long]($presentation.TotalStorage / $t)
-    }
-    elseif($LastViewedReport){
+function PresentationLine{
+    param
+    (
+        $presenation,
+        [string]$folder
+        
+    )
+    if($lastviewedoption){
         $LastViewed =  $presentation.LastViewed
         if($LastViewed -eq "-"){
             $LastViewed = $presentation.Recorded
@@ -210,73 +223,117 @@ function PresentationLine($presentation){
         if($LastViewed -eq "-"){
             $LastViewed = $presentation.LastModified
         }
-        $Total = [Math]::Floor($global:todayepoc - (get-date -Date $LastViewed -UFormat %s))
-        $datehex='0x{0:X8}' -f [INT]([Math]::Floor([decimal](Get-Date([datetime]$LastViewed).ToUniversalTime()-uformat "%s")))
+        $LastModified = [datetime]$LastViewed
     }
     else{
-        $Total=$presentation.TotalStorage  
+        $LastModified = [datetime]$presentation.LastModified
+    }
+    $datehex='0x{0:X8}' -f [INT]([Math]::Floor([decimal](Get-Date($LastModified[0]).ToUniversalTime()-uformat "%s")))
+    
+    if($storagePerView){
+        $t = $presentation.TotalViews
+        if($t -eq 0){
+            $t = .1
+        }
+        $Total = [long]($presentation.TotalStorage / $t)
+    }
+    elseif($LastViewedReport){
+        
+        #write-host $script:todayepoc - (get-date -Date $LastViewed -UFormat %s) =  ([Math]::Floor(($script:todayepoc - (get-date -Date $LastViewed -UFormat %s)) /86400))
+        #$Total = [Math]::Floor($script:todayepoc - (get-date -Date $LastViewed -UFormat %s))
+        #$Total = [math]::log($Total) 
+        #write-host $Total ([math]::Floor([math]::log($Total))) ([math]::Floor(([math]::pow($Total,5) -as [long])))
+        #$Total = [math]::pow($Total,2)
+        #$Total = ([math]::Floor(([math]::pow($Total,5) -as [long])))
+        $Total = ($script:todayepoc - (get-date -Date $LastViewed -UFormat %s)) /86400
+        #$script:maxdays = [math]::Max($Total,$script:maxdays)
+        if($daypower -ne 1){
+            $Total = $Total /365
+            #write-host "taking $daypower power of days since last viewed to emphasize"
+        }
+        $Total = [math]::Floor([math]::pow($Total,$daypower))
+        #write-host "maxdays:$script:maxdays"
+        #$datehex='0x{0:X8}' -f [INT]([Math]::Floor([decimal](Get-Date([datetime]$LastViewed).ToUniversalTime()-uformat "%s")))
+    }
+    elseif($Duration){
+        $Total = [long]$presentation.Duration
+    }
+    elseif($views){
+        $Total = [long]$presentation.TotalViews #* 1024
+        #write-host ([long]$presentation.TotalViews) * 1024 = $Total
+    }
+    else{
+        $Total=[long]$presentation.TotalStorage  
     }
     $Titlenew = $presentation.Title
     $ext = ".10000"
-    if($presentation.TotalViews -eq 0){
+    $tviews = [long]$presentation.TotalViews
+    if($tviews -eq 0){
         $ext = ".0"
     }
-    elseif($presentation.TotalViews -lt 10){
+    elseif($tviews -lt 10){
         $ext = ".1"
     }
-    elseif($presentation.TotalViews -lt 100){
+    elseif($tviews -lt 100){
         $ext = ".10"
     }
-    elseif($presentation.TotalViews -lt 200){
+    elseif($tviews -lt 200){
         $ext = ".100"
     }
-    elseif($presentation.TotalViews -lt 300){
+    elseif($tviews -lt 300){
         $ext= ".200"
     }
-    elseif($presentation.TotalViews -lt 400){
+    elseif($tviews -lt 400){
         $ext= ".300"
     }
-    elseif($presentation.TotalViews -lt 500){
+    elseif($tviews -lt 500){
         $ext= ".400"
     }
-    elseif($presentation.TotalViews -lt 600){
+    elseif($tviews -lt 600){
         $ext= ".500"
     }
-    elseif($presentation.TotalViews -lt 700){
+    elseif($tviews -lt 700){
         $ext= ".600"
     }
-    elseif($presentation.TotalViews -lt 800){
+    elseif($tviews -lt 800){
         $ext= ".700"
     }
-    elseif($presentation.TotalViews -lt 900){
+    elseif($tviews -lt 900){
         $ext= ".800"
     }
-    elseif($presentation.TotalViews -lt 1000){
+    elseif($tviews -lt 1000){
         $ext= ".900"
     }
-    elseif($presentation.TotalView -lt 1100){
+    elseif($tviews -lt 1100){
         $ext = ".1000"
     }
-    elseif($presentation.TotalView -lt 1200){
+    elseif($tviews -lt 1200){
         $ext = ".1100"
     }
-    elseif($presentation.TotalView -lt 1300){
+    elseif($tviews -lt 1300){
         $ext = ".1200"
     }
-    elseif($presentation.TotalView -lt 1400){
+    elseif($tviews -lt 1400){
         $ext = ".1300"
     }
-    elseif($presentation.TotalView -lt 1500){
+    elseif($tviews -lt 1500){
         $ext = ".1400"
     }
-    elseif($presentation.TotalView -lt 1600){
+    elseif($tviews -lt 1600){
         $ext = ".1500"
     }
     
     $Titlenew = $Titlenew.replace('/',"_")
     $Titlenew = (Remove-StringSpecialCharacter -string $Titlenew -keep "-"," ","(",")",".","_") + $ext
     $Titlenew = $Titlenew.replace(' ',"%20")
-    
+    #write-host $Titlenew $Total $tviews $ext
+    $folder =  $folder.Replace('%20',' ')
+    if($Folder[-1] -eq '/'){
+        $script:idtxt += "$($presentation.Id),$Folder$($Titlenew.replace('%20',' ')),`n"
+    }
+    else{
+        $script:idtxt += "$($presentation.Id),$Folder/$($Titlenew.replace('%20',' ')),`n"
+    }
     return "F`t$Titlenew`t$Total`t$datehex`n"
 }
 
@@ -285,27 +342,29 @@ function Directories($presentation){
     #$newfolder = ""
     #$curretd = ""
     
-    if($global:previousFolder -ne $presentation.Folder){
-        $filldirs = inbetweendirs -cdir $global:previousFolder -ndir $presentation.Folder 
-        $global:previousFolder = $presentation.Folder
+    if($script:previousFolder -ne $presentation.Folder){
+        $filldirs = inbetweendirs -cdir $script:previousFolder -ndir $presentation.Folder 
+        $script:previousFolder = $presentation.Folder
         $dirtxt = ""
         
         foreach($d in $filldirs){
-            $dirtxt += ("`nD $($d.Replace(' ','%20'))     4096    0x5a21d1e7`n")
+            #$dirtxt += ("`nD $($d.Replace(' ','%20'))     4096    0x5a21d1e7`n")
+            $dirtxt += ("`nD $($d.Replace(' ','%20'))     0    0x5a21d1e7`n")
+            #$dirtxt += ("`nD $($d.Replace(' ','%20'))     1    0x5a21d1e7`n")
         #    $currentd = $d
         }
         if($revisionReport){
-            return ($dirtxt + (PresentationLineRevisions -presentation $presentation -folder $global:previousFolder))
+            return ($dirtxt + (PresentationLineRevisions -presentation $presentation -folder $script:previousFolder))
         }
         else{
-            return ($dirtxt + (PresentationLine($presentation)))
+            return ($dirtxt + (PresentationLine -presentation $presentation -folder $script:previousFolder))
         }
     }
     if($revisionReport){
-        return ("" + (PresentationLineRevisions -presentation $presentation -folder $global:previousFolder))
+        return ("" + (PresentationLineRevisions -presentation $presentation -folder $script:previousFolder))
     }
     else{
-        return ("" + (PresentationLine($presentation)))   
+        return ("" + (PresentationLine -presentation $presentation -folder $script:previousFolder))   
     }
 }
 
@@ -319,15 +378,20 @@ $header=
 # Type  path            size    mtime           <optional fields>
 '@
 $text2=$header
+
 foreach ($p in $presentations) { $text2 += Directories($p) }
 return $text2
 }
 
 write-host "Reading Mediasite report: $report"
 [xml]$xmlpsych = Get-Content -Path $report
+write-host "Sorting report by folder"
 $sorted = $xmlpsych.MediasiteReport.Presentations.Presentation | Sort-Object -Property Folder
 
 write-host "Converting to QDirStat format"
 $tout = OutputFile($sorted)
 write-host "Saving to: $output"
 $tout | Out-File -FilePath $output -Encoding Ascii
+write-host "Saving idmap.txt"
+#$script:idtxt | Out-File -FilePath ($output + ".idmap") -Encoding Ascii
+$script:idtxt | Out-File -FilePath "idmap.txt" -Encoding Ascii
