@@ -13,7 +13,8 @@ PowerShell script to convert Mediasite Storage report XML file to QDirStat cache
     
 Notes:
 
-    QDirStat info can be found here: https://github.com/shundhammer/qdirstat
+    QDirStat info can be found here: 
+[https://github.com/shundhammer/qdirstat](https://github.com/shundhammer/qdirstat)
 
     It is recommened to add mime setting for .head,.version and .archive
     along with settings for the views extensions .0,.1,.10,.100....
