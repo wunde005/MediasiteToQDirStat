@@ -5,12 +5,17 @@ args=("$@")
 
 id=`grep -F ",${args[0]}," $PWD/idmap.txt | cut -f 1 -d ,`
 
-if [ -z "$mediasiteserver" ]
+if alias chrome 2>/dev/null; then 
+   echo "chrome alias defined"
+else 
+   alias chrome=sensible-browser
+fi
+
+if [ -z "$mediasite2server" ]
 then
     echo "missing mediasite server info"
-    chrome "https://github.com/wunde005/MediasiteToQDirStat/blob/master/openinbrowser.md"
-
-    exit 255 
+    chrome "https://github.com/wunde005/MediasiteToQDirStat/blob/master/openinbrowser.md#open-in-browser-variable-not-set"
+    exit -1 
 
 elif [ -z "$id" ]
 then
