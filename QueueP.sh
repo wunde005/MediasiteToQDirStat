@@ -19,4 +19,12 @@ else
   ppath=${args[0]}
 fi
 
-grep -F ",$ppath," $PWD/idmap.txt >> $PWD/$action.id
+plist=`grep -F ",$ppath," $PWD/idmap.txt`
+lcn=`echo "$plist" | wc -l`
+if [[ $lcn -gt 1 ]] 
+then
+echo "more returned: $lcn"
+echo "$plist" >> $PWD/$action.id
+else
+echo "$plist" >> $PWD/$action.id
+fi

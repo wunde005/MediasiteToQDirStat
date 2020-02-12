@@ -59,6 +59,10 @@ param
 #$todayepoc
 #$maxdays =0
 $script:idtxt = ""
+$script:lastfolder = ""
+$script:lasttitle = ""
+$script:duplicatecnt = 0
+
 $lastviewedoption = ($lastviewed -or $LastViewedReport) 
 
 if($LastViewedReport){
@@ -323,18 +327,36 @@ function PresentationLine{
         $ext = ".1500"
     }
     
+    if($Titlenew -eq $script:lasttitle){
+    }
+    if(($Titlenew -eq $script:lasttitle) -and ($folder -eq $script:lastfolder)){
+        write-host "duplicate: $Titlenew"
+        write-host "folders: $folder`n       : $script:lastfolder"
+        $script:duplicatecnt++
+        $ext = "_" + $script:duplicatecnt + $ext
+        write-host "duplicate title $ext"
+    }
+    else{
+        $script:duplicatecnt = 0       
+    }
+$script:lastfolder = $folder
+$script:lasttitle = $Titlenew
+
     $Titlenew = $Titlenew.replace('/',"_")
-    $Titlenew = (Remove-StringSpecialCharacter -string $Titlenew -keep "-"," ","(",")",".","_") + $ext
+    $Titlenew = (Remove-StringSpecialCharacter -string $Titlenew -keep "-"," ","(",")",".","_")
     $Titlenew = $Titlenew.replace(' ',"%20")
     #write-host $Titlenew $Total $tviews $ext
     $folder =  $folder.Replace('%20',' ')
     if($Folder[-1] -eq '/'){
-        $script:idtxt += "$($presentation.Id),$Folder$($Titlenew.replace('%20',' ')),`n"
+        $script:idtxt += "$($presentation.Id),$Folder$($Titlenew.replace('%20',' '))$ext,`n"
     }
     else{
-        $script:idtxt += "$($presentation.Id),$Folder/$($Titlenew.replace('%20',' ')),`n"
+        $script:idtxt += "$($presentation.Id),$Folder/$($Titlenew.replace('%20',' '))$ext,`n"
     }
-    return "F`t$Titlenew`t$Total`t$datehex`n"
+    
+#$script:duplicatecnt = 0
+
+    return "F`t$Titlenew$ext`t$Total`t$datehex`n"
 }
 
 $previousFolder = ""
@@ -386,7 +408,7 @@ return $text2
 write-host "Reading Mediasite report: $report"
 [xml]$xmlpsych = Get-Content -Path $report
 write-host "Sorting report by folder"
-$sorted = $xmlpsych.MediasiteReport.Presentations.Presentation | Sort-Object -Property Folder
+$sorted = $xmlpsych.MediasiteReport.Presentations.Presentation | Sort-Object -Property Folder,Title
 
 write-host "Converting to QDirStat format"
 $tout = OutputFile($sorted)
