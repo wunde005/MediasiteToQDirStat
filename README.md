@@ -38,4 +38,6 @@ Example Storage revision report viewed in QDirStat:
 ![Example QDirStat Revision Report](/images/Example-revisionReport.jpg)
 
 
-[Notes on getting open in browser working](openinbrowser.md)
+[Notes on getting "open in browser" working](openinbrowser.md)
+
+[Notes on getting cleanup scripts working](cleanupscripts.md)
