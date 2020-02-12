@@ -270,7 +270,7 @@ function PresentationLine{
         $Total=[long]$presentation.TotalStorage  
     }
     $Titlenew = $presentation.Title
-    $ext = ".10000"
+    $ext = ".2000+"
     $tviews = [long]$presentation.TotalViews
     if($tviews -eq 0){
         $ext = ".0"
@@ -322,25 +322,37 @@ function PresentationLine{
     }
     elseif($tviews -lt 1500){
         $ext = ".1400"
-    }
+    }  
     elseif($tviews -lt 1600){
         $ext = ".1500"
     }
-    
+    elseif($tviews -lt 1700){
+        $ext = ".1600"
+    }
+    elseif($tviews -lt 1800){
+        $ext = ".1700"
+    }
+    elseif($tviews -lt 1900){
+        $ext = ".1800"
+    }
+    elseif($tviews -lt 2000){
+        $ext = ".1900"
+    }
+
     if($Titlenew -eq $script:lasttitle){
     }
     if(($Titlenew -eq $script:lasttitle) -and ($folder -eq $script:lastfolder)){
-        write-host "duplicate: $Titlenew"
-        write-host "folders: $folder`n       : $script:lastfolder"
+    #    write-host "duplicate: $Titlenew"
+    #    write-host "folders: $folder`n       : $script:lastfolder"
         $script:duplicatecnt++
         $ext = "_" + $script:duplicatecnt + $ext
-        write-host "duplicate title $ext"
+    #   write-host "duplicate title $ext"
     }
     else{
         $script:duplicatecnt = 0       
     }
-$script:lastfolder = $folder
-$script:lasttitle = $Titlenew
+    $script:lastfolder = $folder
+    $script:lasttitle = $Titlenew
 
     $Titlenew = $Titlenew.replace('/',"_")
     $Titlenew = (Remove-StringSpecialCharacter -string $Titlenew -keep "-"," ","(",")",".","_")

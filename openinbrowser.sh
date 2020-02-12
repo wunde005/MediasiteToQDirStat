@@ -11,7 +11,7 @@ else
    alias chrome=sensible-browser
 fi
 
-if [ -z "$mediasite2server" ]
+if [ -z "$mediasiteserver" ]
 then
     echo "missing mediasite server info"
     chrome "https://github.com/wunde005/MediasiteToQDirStat/blob/master/openinbrowser.md#open-in-browser-variable-not-set"
