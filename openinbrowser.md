@@ -7,8 +7,18 @@ The script needs a system variable set to tell it what the url is for the medias
 
  * add line:
 
-`export mediasiteserver="<server url>"`
+`export mediasiteserver="https://<servername>/mediasite"`
 
 The script will append `/Manage/#module=Sf.Manage.PresentationSummary&args[id]=$id`
 
  * restart bash
+
+
+------------------------
+# other variables that need to be set:
+
+wsl:
+
+~/.bash_aliases
+`alias chrome="/mnt/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome.exe"`
+
