@@ -17,7 +17,7 @@ The script will append `/Manage/#module=Sf.Manage.PresentationSummary&args[id]=$
 ------------------------
 # other variables that need to be set:
 
-wsl:
+wsl: (optional, it will use the 'sensible-browser' command if not set)
 
 ~/.bash_aliases
 `alias chrome="/mnt/c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome.exe"`
