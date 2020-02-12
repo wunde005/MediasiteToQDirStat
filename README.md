@@ -31,6 +31,8 @@ Alternate Reports:
   - Outputs file size as Size/View 
 * LastViewedReport 
   - Outputs file size as seconds since last viewed 
+* views
+  - Outputs file size as views  
   
 Example Storage revision report viewed in QDirStat:
 ![Example QDirStat Revision Report](/images/Example-revisionReport.jpg)
