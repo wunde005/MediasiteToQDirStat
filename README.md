@@ -13,7 +13,8 @@ PowerShell script to convert Mediasite Storage report XML file to QDirStat cache
     
 Notes:
 
-    QDirStat info can be found here: https://github.com/shundhammer/qdirstat
+    QDirStat info can be found here: 
+[https://github.com/shundhammer/qdirstat](https://github.com/shundhammer/qdirstat)
 
     It is recommened to add mime setting for .head,.version and .archive
     along with settings for the views extensions .0,.1,.10,.100....
@@ -31,9 +32,13 @@ Alternate Reports:
   - Outputs file size as Size/View 
 * LastViewedReport 
   - Outputs file size as seconds since last viewed 
+* views
+  - Outputs file size as views  
   
 Example Storage revision report viewed in QDirStat:
 ![Example QDirStat Revision Report](/images/Example-revisionReport.jpg)
 
 
-[Notes on getting open in browser working](openinbrowser.md)
+[Notes on getting "open in browser" working](openinbrowser.md)
+
+[Notes on getting cleanup scripts working](cleanupscripts.md)
